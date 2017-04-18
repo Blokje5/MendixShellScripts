@@ -37,7 +37,7 @@ with the Mendix-Username and Mendix-ApiKey headers set
 Example:
 ./unittest.sh -p 1 -h http://localhost:8080
 
--p:
+* -p:
 Password, set in the UnitTesting.RemoteApiPassword constant
--h:
+* -h:
 Hostname, for example http://localhost:8080
