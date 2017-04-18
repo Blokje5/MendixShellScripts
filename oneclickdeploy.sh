@@ -30,6 +30,10 @@ RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KE
 check_for_error()
 {
   #If it is not an array, we need to check if we have an error message
+  if [ "$RESPONSE" = "" ]
+  then
+    return
+  fi
   ISARRAY=$(echo $RESPONSE | jq 'if type=="array" then 1 else 0 end')
   if (( $ISARRAY < 1 ))
   then
