@@ -20,15 +20,15 @@ the unittest.sh script calls the unittest webservice (from the [Mendix UnitTesti
 Example:
 ./oneclickdeploy.sh -a API-Key -u lennard.eijsackers@finaps.nl -m Acceptance -b trunk -n AppName
 
--a:
+* -a:
 Api Key flag, check [this documentation](https://docs.mendix.com/apidocs-mxsdk/apidocs/authentication) to find your Api Key
--u:
+* -u:
 Mendix username
--m:
+* -m:
 Mode. Test for the test environment, Acceptance for the acceptance environment
--b:
+* -b:
 Branch name, trunk for main line and urlencoded "branches/BRANCH_NAME_HERE" for other branches
--n:
+* -n:
 App name, the name of the app.
 If you do not know which apps to call, you can make a HTTP GET request to the following url https://deploy.mendix.com/api/1/apps/
 with the Mendix-Username and Mendix-ApiKey headers set
