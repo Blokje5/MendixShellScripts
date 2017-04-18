@@ -150,4 +150,4 @@ check_job()
   fi
 }
 check_job
-#./oneclickdeploy.sh -a 29bf3ac5-98cc-47aa-8c5b-f3ea9bceb34f -u lennard.eijsackers@finaps.nl -m Acceptance -b trunk -n quion
+#./oneclickdeploy.sh -a API-Key -u lennard.eijsackers@finaps.nl -m Acceptance -b trunk -n AppName
