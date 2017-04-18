@@ -33,7 +33,7 @@ App name, the name of the app.
 If you do not know which apps to call, you can make a HTTP GET request to the following url https://deploy.mendix.com/api/1/apps/
 with the Mendix-Username and Mendix-ApiKey headers set
 
-###unittest.sh
+### unittest.sh
 Example:
 ./unittest.sh -p 1 -h http://localhost:8080
 
