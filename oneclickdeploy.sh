@@ -26,15 +26,17 @@ while getopts ":a:b:u:n:m:" opt; do
 done
 #Get latest revision. Call returns array, first element of array contains latest revision
 RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/branches/$BRANCH/revisions/")
+#test
 check_for_error()
 {
+  #If it is not an array, we need to check if we have an error message
   ISARRAY=$(echo $RESPONSE | jq 'if type=="array" then 1 else 0 end')
-  if [ $ISARRAY == 0 ]
+  if (( $ISARRAY < 1 ))
   then
-    echo "Error response from server:"
-    ERROR=$(echo $RESPONSE | jq -r ".errorMessage")
-    if [[ $ERROR ]]
+    if echo $RESPONSE | jq -e 'has("errorMessage")' > /dev/null
     then
+      ERROR=$(echo $RESPONSE | jq -r ".errorMessage")
+      echo "Error response from server:"
       echo "$ERROR"
       exit 1
     fi
