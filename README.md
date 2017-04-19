@@ -4,8 +4,8 @@ A repository for mendix  shell scripts which can be used in setting up a CI envi
 ## Configuration
 To be able to use the scripts, you need to have bash and jq installed. 
 The shell scripts are written in bash. jq is used as a JSON parser.
-[How to install bash on windows](http://www.windowscentral.com/how-install-bash-shell-command-line-windows-10)
-[jq](https://stedolan.github.io/jq/)
+- [How to install bash on windows](http://www.windowscentral.com/how-install-bash-shell-command-line-windows-10)
+- [How to install jq](https://stedolan.github.io/jq/)
 
 To get the api key needed to call the oneclickdeploy script, check [this documentation](https://docs.mendix.com/apidocs-mxsdk/apidocs/authentication)
 
