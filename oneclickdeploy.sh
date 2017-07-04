@@ -56,7 +56,8 @@ generate_body_package()
     {
         "Revision":$NUMBER,
         "Version":"1.0.0", 
-        "Description": "Automated Build" 
+        "Description": "Automated Build", 
+        "Branch": $BRANCH
     }
 EOF
 }
