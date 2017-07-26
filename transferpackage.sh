@@ -89,10 +89,16 @@ RESPONSE=$(curl -s --output $PACKAGEID.mda -X GET -H "Mendix-Username: $USER" -H
 check_for_error
 echo "Package downloaded"
 #Upload package to environment
-RESPONSE=$(curl -v --data-binary "@$PACKAGEID.mda" -X POST -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/packages/upload")
-echo $RESPONSE
+RESPONSE=$(curl -s -F "file=@$PACKAGEID.mda" -F "Name=$BRANCH-$NUMBER.mda" -X POST -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/packages/upload")
 check_for_error
-echo "Package uploaded"
+echo "Package uploaded" 
+rm -f "$PACKAGEID.mda"
+#Retrieve new package
+RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/packages/)
+check_for_error
+VERSION="1.0.0.$NUMBER"
+#Retrieve the first build package with the selected version
+PACKAGEID=$(echo $RESPONSE | jq --arg v "$VERSION" '[.[] | select(.Version==$v)][0] | .PackageId')
 #Shut down environment
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/stop/")
 check_for_error
@@ -119,7 +125,7 @@ generate_body_check_package()
 {
   cat <<EOF
   {
-    "PackageId":"$PACKAGEID"
+    "PackageId":$PACKAGEID
   }
 EOF
 }
@@ -130,8 +136,9 @@ check_packageid_on_environment()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/package/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | jq -r '.PackageId')
-  if [ "$STATUS" == "$PACKAGEID" ]
+  local STATUS=$(echo $RESPONSE | jq -r '.Status')
+  local CODE="Succeeded"
+  if [ "$STATUS" == "$CODE" ]
   then
     echo "Package transported to environment"
     return
@@ -169,4 +176,3 @@ check_job()
   fi
 }
 check_job
-#be50f280-5951-468a-9d3c-522f2b2192fc
