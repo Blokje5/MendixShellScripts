@@ -27,6 +27,12 @@ while getopts ":a:b:u:n:m:o:" opt; do
       ;;
   esac
 done
+echo $API_KEY
+echo $USER
+echo $BRANCH
+echo $APP_ID
+echo $MODE
+echo $APP_ID_TRANSFER
 #Get latest revision. Call returns array, first element of array contains latest revision
 RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/branches/$BRANCH/revisions/")
 #test
