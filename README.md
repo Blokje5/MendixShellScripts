@@ -13,6 +13,7 @@ To enable the unittesting webservice, change the UnitTesting.RemoteApiEnabled co
 
 ## Features
 The oneclickdeploy.sh script finds the latest commit on the team server, builds a package for it and deploys it to the specified environment
+The transferpackage.sh script finds the latest commit on the team server, builds a package for it and transfers it to another node.
 the unittest.sh script calls the unittest webservice (from the [Mendix UnitTesting module](https://github.com/mendix/UnitTesting)) and checks if all test run succesfully
 
 ## Usage
@@ -41,3 +42,21 @@ Example:
 Password, set in the UnitTesting.RemoteApiPassword constant
 * -h:
 Hostname, for example http://localhost:8080
+
+### transferpackage.sh
+Example:
+./oneclickdeploy.sh -a API-Key -u lennard.eijsackers@finaps.nl -m Acceptance -b trunk -n AppName -o AppNameTwo
+
+* -a:
+Api Key flag, check [this documentation](https://docs.mendix.com/apidocs-mxsdk/apidocs/authentication) to find your Api Key
+* -u:
+Mendix username
+* -m:
+Mode. Test for the test environment, Acceptance for the acceptance environment
+* -b:
+Branch name, trunk for main line and urlencoded "branches/BRANCH_NAME_HERE" for other branches
+* -n:
+App name, the name of the app where to build the package from.
+* -o:
+Node name, the name of the app where to transfer the package to.
+
