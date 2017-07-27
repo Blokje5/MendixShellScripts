@@ -66,9 +66,11 @@ generate_body_package()
 EOF
 }
 #Build package
-RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
+RESPONSE=$(curl -s -v POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
+echo $RESPONSE
 check_for_error
 PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
+echo $PACKAGEID
 #check if status is Succeeded, else try again
 check_package_status()
 {
