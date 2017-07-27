@@ -51,6 +51,7 @@ check_for_error()
 }
 check_for_error
 NUMBER=$(echo $RESPONSE | $JQ ".[0] |  .Number ")
+echo "Revision found"
 #Generate body for package request
 generate_body_package()
 {
@@ -74,6 +75,7 @@ check_package_status()
     local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/$PACKAGEID/ )
     check_for_error
     local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+    echo $STATUS
     local CODE="Succeeded"
     if [ "$STATUS" == "$CODE" ]
     then 
