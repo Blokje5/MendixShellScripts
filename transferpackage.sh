@@ -1,7 +1,7 @@
 #!/bin/bash
 #Mendix one click deploy
 
-JQ="D:\Devtools\$JQ.exe"
+JQ="D:\Devtools\JQ.exe"
 #Check flags and initialize parameters needed for REST calls
 while getopts ":a:b:u:n:m:o:" opt; do
   case $opt in
