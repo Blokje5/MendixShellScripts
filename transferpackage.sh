@@ -72,7 +72,7 @@ generate_body_package()
 EOF
 }
 #Build package
-RESPONSE=$(curl -v -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
+RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
 echo $RESPONSE
 check_for_error
 PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
@@ -119,6 +119,7 @@ check_environment_status()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/")
   check_for_error
+  echo $RESPONSE
   local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
   local CODE="Stopped"
   if [ "$STATUS" == "$CODE" ]
@@ -140,7 +141,8 @@ generate_body_check_package()
   }
 EOF
 }
-RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
+RESPONSE=$(curl -v -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
+echo $RESPONSE
 check_for_error
 #Check if environment package = $PACKAGEID
 check_packageid_on_environment()
