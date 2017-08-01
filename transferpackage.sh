@@ -27,12 +27,6 @@ while getopts ":a:b:u:n:m:o:" opt; do
       ;;
   esac
 done
-echo $API_KEY
-echo $USER
-echo $BRANCH
-echo $APP_ID
-echo $MODE
-echo $APP_ID_TRANSFER
 #Get latest revision. Call returns array, first element of array contains latest revision
 RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/branches/$BRANCH/revisions/")
 #test
@@ -76,7 +70,7 @@ RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: applica
 echo $RESPONSE
 check_for_error
 PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
-echo $PACKAGEID
+
 #check if status is Succeeded, else try again
 check_package_status()
 {
@@ -141,7 +135,7 @@ generate_body_check_package()
   }
 EOF
 }
-RESPONSE=$(curl -v -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
+RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
 echo $RESPONSE
 check_for_error
 #Check if environment package = $PACKAGEID
