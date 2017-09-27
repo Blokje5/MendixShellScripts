@@ -1,6 +1,7 @@
 #!/bin/bash
 #Mendix one click deploy
 
+JQ="D:\Devtools\JQ.exe"
 #Check flags and initialize parameters needed for REST calls
 while getopts ":a:b:u:n:m:o:" opt; do
   case $opt in
@@ -36,12 +37,12 @@ check_for_error()
   then
     return
   fi
-  ISARRAY=$(echo $RESPONSE | jq 'if type=="array" then 1 else 0 end')
+  ISARRAY=$(echo $RESPONSE | $JQ 'if type=="array" then 1 else 0 end')
   if (( $ISARRAY < 1 ))
   then
-    if echo $RESPONSE | jq -e 'has("errorMessage")' > /dev/null
+    if echo $RESPONSE | $JQ -e 'has("errorMessage")' > /dev/null
     then
-      ERROR=$(echo $RESPONSE | jq -r ".errorMessage")
+      ERROR=$(echo $RESPONSE | $JQ -r ".errorMessage")
       echo "Error response from server:"
       echo "$ERROR"
       exit 1
@@ -49,7 +50,8 @@ check_for_error()
   fi
 }
 check_for_error
-NUMBER=$(echo $RESPONSE | jq ".[0] |  .Number ")
+NUMBER=$(echo $RESPONSE | $JQ ".[0] |  .Number ")
+echo "Revision found"
 #Generate body for package request
 generate_body_package()
 {
@@ -65,14 +67,17 @@ EOF
 }
 #Build package
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
+echo $RESPONSE
 check_for_error
-PACKAGEID=$(echo $RESPONSE | jq -r '.PackageId')
+PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
+
 #check if status is Succeeded, else try again
 check_package_status()
 {
     local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/$PACKAGEID/ )
     check_for_error
-    local STATUS=$(echo $RESPONSE | jq -r '.Status')
+    local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+    echo $STATUS
     local CODE="Succeeded"
     if [ "$STATUS" == "$CODE" ]
     then 
@@ -98,7 +103,7 @@ RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KE
 check_for_error
 VERSION="1.0.0.$NUMBER"
 #Retrieve the first build package with the selected version
-PACKAGEID=$(echo $RESPONSE | jq --arg v "$VERSION" '[.[] | select(.Version==$v)][0] | .PackageId')
+PACKAGEID=$(echo $RESPONSE | $JQ --arg v "$VERSION" '[.[] | select(.Version==$v)][0] | .PackageId')
 #Shut down environment
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/stop/")
 check_for_error
@@ -108,7 +113,8 @@ check_environment_status()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | jq -r '.Status')
+  echo $RESPONSE
+  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
   local CODE="Stopped"
   if [ "$STATUS" == "$CODE" ]
   then
@@ -130,13 +136,14 @@ generate_body_check_package()
 EOF
 }
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
+echo $RESPONSE
 check_for_error
 #Check if environment package = $PACKAGEID
 check_packageid_on_environment()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/package/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | jq -r '.Status')
+  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
   local CODE="Succeeded"
   if [ "$STATUS" == "$CODE" ]
   then
@@ -158,13 +165,13 @@ generate_body_start()
 EOF
 }
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_start)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/start/")
-JOBID=$(echo $RESPONSE | jq -r '.JobId')
+JOBID=$(echo $RESPONSE | $JQ -r '.JobId')
 #check status Job
 check_job()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/start/$JOBID/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | jq -r '.Status')
+  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
   local CODE="Started"
   if [ "$STATUS" == "$CODE" ]
   then
