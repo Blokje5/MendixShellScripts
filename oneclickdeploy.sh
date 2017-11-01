@@ -1,6 +1,5 @@
 #!/bin/bash
 #Mendix one click deploy
-JQ="D:\Devtools\JQ.exe"
 
 #Check flags and initialize parameters needed for REST calls
 while getopts ":a:b:u:n:m:" opt; do
@@ -31,12 +30,12 @@ RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KE
 check_for_error()
 {
   #If it is not an array, we need to check if we have an error message
-  ISARRAY=$(echo $RESPONSE | $JQ 'if type=="array" then 1 else 0 end')
+  ISARRAY=$(echo $RESPONSE | jq 'if type=="array" then 1 else 0 end')
   if (( $ISARRAY < 1 ))
   then
-    if echo $RESPONSE | $JQ -e 'has("errorMessage")' > /dev/null
+    if echo $RESPONSE | jq -e 'has("errorMessage")' > /dev/null
     then
-      ERROR=$(echo $RESPONSE | $JQ -r ".errorMessage")
+      ERROR=$(echo $RESPONSE | jq -r ".errorMessage")
       echo "Error response from server:"
       echo "$ERROR"
       exit 1
@@ -44,7 +43,7 @@ check_for_error()
   fi
 }
 check_for_error
-NUMBER=$(echo $RESPONSE | $JQ ".[0] |  .Number ")
+NUMBER=$(echo $RESPONSE | jq ".[0] |  .Number ")
 #Generate body for package request
 generate_body_package()
 {
@@ -61,13 +60,13 @@ EOF
 #Build package, nowadays a synchronous call.
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" -d "$(generate_body_package)" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/)
 check_for_error
-PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
+PACKAGEID=$(echo $RESPONSE | jq -r '.PackageId')
 #check if status is Succeeded, else try again
 check_package_status()
 {
     local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/$PACKAGEID/ )
     check_for_error
-    local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+    local STATUS=$(echo $RESPONSE | jq -r '.Status')
     local CODE="Succeeded"
     if [ "$STATUS" == "$CODE" ]
     then 
@@ -87,7 +86,7 @@ check_environment_status()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/environments/$MODE/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+  local STATUS=$(echo $RESPONSE | jq -r '.Status')
   local CODE="Stopped"
   if [ "$STATUS" == "$CODE" ]
   then
@@ -120,13 +119,13 @@ generate_body_start()
 EOF
 }
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_start)" "https://deploy.mendix.com/api/1/apps/$APP_ID/environments/$MODE/start/")
-JOBID=$(echo $RESPONSE | $JQ -r '.JobId')
+JOBID=$(echo $RESPONSE | jq -r '.JobId')
 #check status Job
 check_job()
 {
   local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/environments/$MODE/start/$JOBID/")
   check_for_error
-  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+  local STATUS=$(echo $RESPONSE | jq -r '.Status')
   local CODE="Started"
   if [ "$STATUS" == "$CODE" ]
   then

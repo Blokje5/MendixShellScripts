@@ -4,7 +4,6 @@
 #Example how to run
 #./unittest.sh -p 1 -h http://windowshost:8080
 
-JQ="D:\Devtools\JQ.exe"
 #Check flags and initialize parameters needed for REST calls
 while getopts ":p:h:" opt; do
   case $opt in
@@ -43,10 +42,10 @@ fi
 check_failed_unittests()
 {
     #function depends on passed response, passed as $1
-    local FAILURE=$(echo $1 | $JQ -r ".failures")
+    local FAILURE=$(echo $1 | jq -r ".failures")
     if [ "$FAILURE" = "1" ]
     then
-        echo $1 | $JQ -r ".failed_tests"
+        echo $1 | jq -r ".failed_tests"
         exit 1
     else
        echo "unittest completed succesfully"
@@ -56,7 +55,7 @@ check_failed_unittests()
 check_completed_status()
 {
     local RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -d "$(generate_body_unittests)" "$HOST/unittests/status")
-    local COMPLETED=$(echo $RESPONSE | $JQ -r ".completed")
+    local COMPLETED=$(echo $RESPONSE | jq -r ".completed")
     if [ "$COMPLETED" == "false" ]
     then
         check_completed_status
