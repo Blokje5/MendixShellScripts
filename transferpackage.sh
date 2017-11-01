@@ -70,6 +70,25 @@ RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: applica
 echo $RESPONSE
 check_for_error
 PACKAGEID=$(echo $RESPONSE | $JQ -r '.PackageId')
+
+#check if status is Succeeded, else try again
+check_package_status()
+{
+    local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY" https://deploy.mendix.com/api/1/apps/$APP_ID/packages/$PACKAGEID/ )
+    check_for_error
+    local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
+    echo $STATUS
+    local CODE="Succeeded"
+    if [ "$STATUS" == "$CODE" ]
+    then 
+        echo "Package build finished"
+        return 
+    else
+        sleep 10
+        check_package_status
+    fi
+}
+check_package_status
 #Download package and store as .mda
 RESPONSE=$(curl -s --output $PACKAGEID.mda -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID/packages/$PACKAGEID/download")
 check_for_error
@@ -119,23 +138,6 @@ EOF
 RESPONSE=$(curl -s -X POST -H "Mendix-Username: $USER" -H "Content-Type: application/json" -H "Mendix-ApiKey: $API_KEY"  -d "$(generate_body_check_package)" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/transport/")
 echo $RESPONSE
 check_for_error
-#Check if environment package = $PACKAGEID
-check_packageid_on_environment()
-{
-  local RESPONSE=$(curl -s -X GET -H "Mendix-Username: $USER" -H "Mendix-ApiKey: $API_KEY" "https://deploy.mendix.com/api/1/apps/$APP_ID_TRANSFER/environments/$MODE/package/")
-  check_for_error
-  local STATUS=$(echo $RESPONSE | $JQ -r '.Status')
-  local CODE="Succeeded"
-  if [ "$STATUS" == "$CODE" ]
-  then
-    echo "Package transported to environment"
-    return
-  else
-    sleep 10
-    check_packageid_on_environment
-  fi
-}
-check_packageid_on_environment
 #Start environment
 generate_body_start()
 {
